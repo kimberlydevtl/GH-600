@@ -1,0 +1,19 @@
+# M3 demo, step 1: copy to .github/workflows/pr-report.yml and open a PR.
+# Expected: the "Comment on PR" step fails with 403 because the token is read-only.
+name: pr-report
+on: pull_request
+permissions:
+  contents: read
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: bash scripts/verify.sh || true
+      - name: Comment on PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment ${{ github.event.pull_request.number }} --body-file .verify/report.md
