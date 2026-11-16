@@ -1,3 +1,5 @@
+import { AUTH_MODE, getAccessToken, redirectForInteraction } from './auth';
+
 export type Status = 'pending' | 'approved' | 'rejected';
 export interface Me { id: string; name: string; role: 'employee' | 'manager' | 'admin'; can: { approve: boolean; viewAudit: boolean } }
 export interface LeaveRequest { id: number; userId: string; start: string; end: string; reason: string; status: Status }
@@ -14,12 +16,23 @@ export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
 
-// DEMO IDENTITY: the x-user header stands in for a real sign-in token.
 async function call<T>(user: string, path: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(path, {
-    ...init,
-    headers: { 'content-type': 'application/json', 'x-user': user, ...(init.headers ?? {}) }
-  });
+  const send = async (forceRefresh = false) => {
+    const headers = new Headers(init.headers);
+    headers.set('content-type', 'application/json');
+    if (AUTH_MODE === 'entra') {
+      headers.set('authorization', `Bearer ${await getAccessToken(forceRefresh)}`);
+    } else {
+      headers.set('x-user', user);
+    }
+    return fetch(path, { ...init, headers });
+  };
+
+  let res = await send();
+  if (AUTH_MODE === 'entra' && res.status === 401) {
+    res = await send(true);
+    if (res.status === 401) await redirectForInteraction();
+  }
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw new ApiError(res.status, body.error ?? res.statusText);
   return body as T;

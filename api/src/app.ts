@@ -3,12 +3,12 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { Repo } from './data/types.js';
-import { identify } from './auth/identify.js';
+import { identify, type AuthConfig } from './auth/identify.js';
 import { leaveRoutes } from './routes/leave.js';
 
 export const BUILD_ID = process.env.BUILD_ID ?? 'local';
 
-export function createApp(repo: Repo, opts: { webDist?: string } = {}) {
+export function createApp(repo: Repo, opts: { webDist?: string; auth?: AuthConfig } = {}) {
   const app = express();
   app.use(express.json());
 
@@ -18,7 +18,7 @@ export function createApp(repo: Repo, opts: { webDist?: string } = {}) {
   app.get('/api/version', (_req, res) => { res.json({ build: BUILD_ID }); });
 
   // Everything else under /api needs an identity (secure by default).
-  app.use('/api', identify(repo));
+  app.use('/api', identify(repo, opts.auth));
 
   // The UI uses `can` for ergonomics only. Every route re-checks on the server.
   app.get('/api/me', (_req, res) => {
