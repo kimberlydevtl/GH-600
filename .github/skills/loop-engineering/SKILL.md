@@ -20,6 +20,7 @@ then open only the one skill that matches the task. Do not load every skill.
 | Something failed or behaves oddly, or you just fixed a non-obvious failure | `lessons-learned` |
 | UI: app shell, components, theme, tables, dashboards | `ui-shell` |
 | Sign-in, tokens, AUTH_MODE, 401 or AADSTS errors | `entra-auth` |
+| Designing or reviewing an Azure SQL architecture | `azure-sql-architecture` |
 | Azure SQL data layer, schema, managed identity, DATA_BACKEND | `azure-sql-mi` |
 | Infrastructure, deploy workflow, confirming a deploy is live | `deploy-azure` |
 

@@ -4,9 +4,12 @@ description: Use when creating Azure infrastructure for the app, writing or chan
 ---
 # Deploy to Azure App Service
 
+For the subscription, resource group, region and resource names, read `docs/azure-target.md`. Follow its rules for `az` commands.
+
 Read decisions 0005 (build id, not health) and 0007 (OIDC, managed identity, no Easy Auth).
 Deploying changes a live system: open a PR, and let the `production` environment approval
-gate the actual deploy. Never deploy from an agent session directly.
+gate the actual deploy. Never deploy to production from an agent session directly. Deploying
+to the test environment (`Github-test`) from an agent session is allowed.
 
 ## Target shape
 
@@ -32,7 +35,11 @@ relative layout (`api/dist` serves `../../web/dist`).
 
 ## Workflow (`.github/workflows/deploy.yml`)
 
-- Trigger: push to `main` (after the `ladder` check has passed in the PR).
+- Two jobs, two environments (see the autonomy table in `docs/azure-target.md`):
+  - `deploy-test`: on pull requests, after `ladder` passes. `environment: test` (no reviewers),
+    identity `gh600-deploy-test`, target `leave-gh600-kty-test`. Runs the deployed check.
+  - `deploy-prod`: on push to `main`. `environment: production` (required reviewer),
+    identity `gh600-deploy`, target `leave-gh600-kty`.
 - Top-level `permissions: contents: read`. Only the deploy job adds `id-token: write`.
 - `environment: production` with required reviewers. This is the human gate.
 - Sign in with `azure/login` using OIDC: `client-id`, `tenant-id`, `subscription-id` from

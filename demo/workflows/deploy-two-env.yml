@@ -1,0 +1,74 @@
+# Template: copy to .github/workflows/deploy.yml (or compare with the agent's PR for #10).
+# test deploys automatically after the ladder; production waits for the environment reviewer.
+name: deploy
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci && bash scripts/verify.sh
+      # Simple for the demo: ships the root node_modules (includes dev dependencies).
+      - run: zip -qr app.zip package.json api/dist api/package.json node_modules web/dist
+      - uses: actions/upload-artifact@v4
+        with: { name: app, path: app.zip }
+
+  deploy-test:
+    needs: build
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    environment: test
+    permissions: { contents: read, id-token: write }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: app }
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          package: app.zip
+      - name: Deployed check
+        run: |
+          H=https://${{ vars.AZURE_WEBAPP_NAME }}.azurewebsites.net
+          for i in $(seq 1 20); do
+            curl -sf "$H/api/version" && exit 0; sleep 15
+          done
+          echo "App did not answer on $H/api/version"; exit 1
+
+  deploy-prod:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions: { contents: read, id-token: write }
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: app }
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          package: app.zip
+      - name: Deployed check
+        run: |
+          H=https://${{ vars.AZURE_WEBAPP_NAME }}.azurewebsites.net
+          for i in $(seq 1 20); do
+            curl -sf "$H/api/version" && exit 0; sleep 15
+          done
+          echo "App did not answer on $H/api/version"; exit 1
