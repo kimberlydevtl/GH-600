@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, DEMO_USERS, type LeaveRequest } from './api';
+import { api, ApiError, DEMO_USERS, type LeaveRequest } from './api';
+import { AUTH_MODE, signOut } from './auth';
 import { StatusPill } from './components/StatusPill';
 import { NewRequestForm } from './components/NewRequestForm';
 
@@ -17,7 +18,9 @@ export default function App() {
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
-    try { localStorage.setItem('demo-user', user); } catch { /* storage unavailable */ }
+    if (AUTH_MODE === 'demo') {
+      try { localStorage.setItem('demo-user', user); } catch { /* storage unavailable */ }
+    }
     setToast(null);
   }, [user]);
 
@@ -32,9 +35,22 @@ export default function App() {
     onError: (e: Error & { status?: number }) => setToast(`Refused by the API (${e.status ?? 'error'}): ${e.message}`)
   });
 
+  const currentUser = AUTH_MODE === 'entra' ? (me.data?.id ?? 'entra') : user;
   const items = leave.data ?? [];
   const counts = { pending: items.filter((i) => i.status === 'pending').length, approved: items.filter((i) => i.status === 'approved').length };
-  const canSeeApprove = (r: LeaveRequest) => trainerMode || (me.data?.can.approve && r.status === 'pending' && r.userId !== user);
+  const canSeeApprove = (r: LeaveRequest) => trainerMode || (me.data?.can.approve && r.status === 'pending' && r.userId !== currentUser);
+
+  if (me.error instanceof ApiError && me.error.status === 403) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-lg items-center p-6">
+        <section className="w-full rounded-xl border border-neutral-200 bg-white p-6 text-center shadow-sm">
+          <h1 className="text-xl font-semibold">Account not provisioned</h1>
+          <p className="my-4 text-sm text-neutral-600">Your Microsoft account is signed in but is not provisioned for Leave Tracker.</p>
+          <button onClick={() => void signOut()} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">Sign out</button>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-5xl p-6">
@@ -48,9 +64,16 @@ export default function App() {
             <input type="checkbox" checked={trainerMode} onChange={(e) => setTrainerMode(e.target.checked)} />
             Trainer mode: show all buttons
           </label>
-          <select value={user} onChange={(e) => setUser(e.target.value)} className="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm">
-            {DEMO_USERS.map((u) => <option key={u.id} value={u.id}>{u.label}</option>)}
-          </select>
+          {AUTH_MODE === 'demo' ? (
+            <select value={user} onChange={(e) => setUser(e.target.value)} className="rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm">
+              {DEMO_USERS.map((u) => <option key={u.id} value={u.id}>{u.label}</option>)}
+            </select>
+          ) : (
+            <div className="flex items-center gap-2 text-sm">
+              <span>{me.data?.name ?? 'Signed in'}</span>
+              <button onClick={() => void signOut()} className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">Sign out</button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -97,7 +120,7 @@ export default function App() {
         </section>
 
         <aside className="space-y-6">
-          <NewRequestForm user={user} />
+          <NewRequestForm user={currentUser} />
           {me.data?.can.viewAudit && (
             <section className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
               <h2 className="mb-2 text-sm font-semibold">Audit log</h2>
