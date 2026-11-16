@@ -4,6 +4,8 @@ description: Use when adding or changing the Azure SQL data layer (AzureSqlRepo)
 ---
 # Azure SQL with managed identity
 
+For the subscription, resource group, region and resource names, read `docs/azure-target.md`. Follow its rules for `az` commands.
+
 Read decisions 0001 (data behind `Repo`) and 0007 (no secrets) first. The whole point of
 this stage is that **only `api/src/data/` changes**. If your plan touches routes, the web
 app or MCP tools, the plan is wrong.

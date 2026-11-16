@@ -4,6 +4,8 @@ description: Use when adding or changing Entra ID sign-in (MSAL in the web app, 
 ---
 # Entra ID sign-in
 
+For the subscription, resource group, region and resource names, read `docs/azure-target.md`. Follow its rules for `az` commands.
+
 Read decisions 0002 (AUTH_MODE), 0006 (roles from the database) and 0007 (no secrets)
 before changing anything here. Changes in `api/src/auth/` need code owner review.
 
