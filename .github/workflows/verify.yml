@@ -1,0 +1,24 @@
+name: verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Least privilege: read-only by default for every job.
+permissions:
+  contents: read
+
+jobs:
+  # Do not rename this job. The ruleset requires the "ladder" check.
+  ladder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verification ladder (the same script the agents run)
+        run: bash scripts/verify.sh

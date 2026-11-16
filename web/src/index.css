@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* Theme tokens. Tint only the accent; keep the canvas neutral. */
+@theme {
+  --color-primary: oklch(0.52 0.16 255);
+  --color-primary-foreground: oklch(0.99 0 0);
+  --color-ok: oklch(0.6 0.13 155);
+  --color-warn: oklch(0.72 0.15 75);
+  --color-critical: oklch(0.58 0.2 25);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body { @apply bg-neutral-50 text-neutral-900 antialiased; }

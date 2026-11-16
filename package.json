@@ -1,0 +1,17 @@
+{
+  "name": "leave-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GH-600 loop engineering demo: React web app + API + MCP server.",
+  "workspaces": ["api", "web", "mcp"],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,magenta \"npm run dev -w api\" \"npm run dev -w web\"",
+    "build": "npm run build -w web && npm run build -w api && npm run build -w mcp",
+    "start": "npm run start -w api",
+    "typecheck": "npm run typecheck -w api && npm run typecheck -w web && npm run typecheck -w mcp",
+    "test": "npm test -w api",
+    "verify": "bash scripts/verify.sh"
+  },
+  "engines": { "node": ">=20" },
+  "devDependencies": { "concurrently": "^9.1.0" }
+}

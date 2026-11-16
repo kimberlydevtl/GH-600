@@ -1,0 +1,31 @@
+name: Agent task
+description: A task written so an agent can plan it well. Vague goals produce vague plans.
+title: "[task] "
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: One sentence. The outcome a user would notice.
+    validations: { required: true }
+  - type: textarea
+    id: success
+    attributes:
+      label: Success criteria
+      description: Checks that can fail. Which test would go red if this were wrong?
+    validations: { required: true }
+  - type: textarea
+    id: scope
+    attributes:
+      label: In scope / out of scope
+      description: Files the agent may touch, and files it must not touch.
+    validations: { required: true }
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk
+      options:
+        - Low (docs, tests)
+        - Medium (route logic, PR review required)
+        - High (auth, workflows, data; human approval, no merge)
+    validations: { required: true }

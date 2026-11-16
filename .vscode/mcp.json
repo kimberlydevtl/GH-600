@@ -1,0 +1,17 @@
+{
+  "servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/"
+    },
+    "leave-tracker": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["tsx", "mcp/src/server.ts"],
+      "env": {
+        "LEAVE_API_URL": "http://localhost:3001",
+        "LEAVE_USER": "ben"
+      }
+    }
+  }
+}
