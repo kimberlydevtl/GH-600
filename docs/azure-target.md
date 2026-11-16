@@ -26,6 +26,7 @@ app. Do not change or delete them.
 | Settings | `NODE_ENV=staging`, `AUTH_MODE=demo`, `DATA_BACKEND=memory` | `NODE_ENV=production`, `AUTH_MODE=entra` |
 | GitHub environment | `test`, no reviewers | `production`, required reviewer @kimberlydevtl |
 | Deploy identity | `gh600-deploy-test`: **Contributor on `Github-test` only** | `gh600-deploy`: **Website Contributor on `leave-gh600-kty` only** |
+| Copilot cloud agent | Creates and changes anything (`gh600-copilot`, Contributor) | Reads only (`gh600-copilot`, Reader) |
 | Deploy trigger | Automatic after the `ladder` check passes on a PR | Push to `main`, then a person approves |
 | Agent may, without asking | Create, change, redeploy and delete resources in `Github-test`; read logs; rerun the deployed check | Read only (`show`, `list`, `log tail`) |
 | Agent must stop and ask | Anything outside `Github-test`, anything that costs more than a B1 plan or a serverless SQL database | Every create, change, delete or deploy |
@@ -46,5 +47,8 @@ cannot reach `Github`, and production deploys cannot run without the environment
   `-g` explicitly). Anywhere else, stop, show the exact command and why, and wait for a
   person. Prefer putting lasting changes in `infra/main.bicep` and a pull request.
 - Never add `az login` credentials, publish profiles or connection strings to the repository.
-- The Copilot coding agent (cloud) has no Azure access. Azure changes from GitHub happen only
-  through workflows: `test` deploys automatically, `production` only after approval.
+- The Copilot cloud agent (the one you assign issues to) signs in to Azure as `gh600-copilot`
+  through `.github/workflows/copilot-setup-steps.yml`. That identity is **Contributor on
+  `Github-test`** (create anything) and **Reader on `Github`** (look, never change). So in the
+  cloud the production limit is not an instruction: Azure itself refuses the write.
+- Production changes from GitHub happen only through the deploy workflow, after approval.

@@ -55,3 +55,6 @@ Every change follows **plan → act → verify → report**.
 - Demo users (header `x-user`, or the dropdown in the UI): `ana`, `raj` (employees),
   `ben` (manager), `cara` (admin)
 - Full verification ladder: `bash scripts/verify.sh`
+
+## Autonomy
+Test environments you may change alone; production waits for a person. Details and limits: `docs/azure-target.md`.

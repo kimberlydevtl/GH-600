@@ -8,7 +8,8 @@ For the subscription, resource group, region and resource names, read `docs/azur
 
 Read decisions 0005 (build id, not health) and 0007 (OIDC, managed identity, no Easy Auth).
 Deploying changes a live system: open a PR, and let the `production` environment approval
-gate the actual deploy. Never deploy from an agent session directly.
+gate the actual deploy. Never deploy to production from an agent session directly. Deploying
+to the test environment (`Github-test`) from an agent session is allowed.
 
 ## Target shape
 
