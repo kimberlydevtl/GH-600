@@ -107,3 +107,16 @@ Before class, run issues #7 to #10 (one per upgrade stage) with agents, under th
 loop. In the wrap, show the four PRs (plans, evidence, approvals) and the live Azure URL:
 "Same repo you used today. Agents did these upgrades, through the same checks and gates."
 Details in `docs/AZURE-PHASE-2.md`.
+
+## Backups
+
+Run after rehearsing and after `bash scripts/reset-demo.sh` (reset closes open PRs).
+
+1. `bash scripts/make-backups.sh` assigns #1, #4, #5, #6 to Copilot and opens the M3 token PR.
+2. About 3 minutes later, when that PR's `pr-report` check has failed: `bash scripts/make-backups.sh fix`.
+3. M2 plans (by hand, 10 minutes): in VS Code, `git checkout -b backup/plans`, run the planner on issue #2 as in the M2 demo,
+   rename the result to `plan-before.md`, run the planner again on the rewritten objective (`plan.md`), then
+   `git add plan-before.md plan.md && git commit -m "Backup: M2 plans" && git push -u origin backup/plans` and
+   `gh pr create --draft --label backup --title "Backup (M2): plans" --body "Before and after plans for issue #2"`. Then `git checkout main`.
+4. When Copilot has opened its PRs (15 to 40 minutes): `bash scripts/make-backups.sh label`. This labels them and approves their waiting workflow runs (Copilot PRs do not run workflows until a human approves), so #5 shows the red `ladder` check.
+5. Check: `bash scripts/make-backups.sh status` shows five or six PRs labelled `backup`.
