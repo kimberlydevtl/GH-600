@@ -12,6 +12,7 @@ A leave tracker with three parts, served from one origin:
   All data access goes through the `Repo` interface in `api/src/data/types.ts`.
 - `mcp/`: an MCP server that exposes the API as agent tools. It calls the API, never the data.
 
+
 ## Memory in this repo
 
 - `docs/decisions/`: why things are built this way. **Read the relevant records before
